@@ -58,7 +58,7 @@ app.get("/", (c) => {
     return c.text("Swades AI Support API v1.0");
 });
 
-const port = 8000;
+const port = parseInt(process.env.PORT || "8000", 10);
 console.log(`Server is running on port ${port}`);
 
 serve({

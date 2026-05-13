@@ -1,0 +1,22 @@
+{
+  "name": "ai-powered-multi-agent-support-system",
+  "version": "1.0.0",
+  "description": "AI-Powered Multi-Agent Support System",
+  "private": true,
+  "workspaces": [
+    "frontend/backend",
+    "frontend/frontend"
+  ],
+  "scripts": {
+    "install-all": "npm install && cd frontend/backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"cd frontend/backend && npm run dev\" \"cd frontend/frontend && npm run dev\"",
+    "build": "npm run build -w frontend/backend && npm run build -w frontend/frontend",
+    "start:backend": "cd frontend/backend && npm start",
+    "start:frontend": "cd frontend/frontend && npm start",
+    "build:backend": "cd frontend/backend && npm run build",
+    "build:frontend": "cd frontend/frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

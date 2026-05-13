@@ -1,5 +1,19 @@
 services:
   - type: web
+    name: ai-support-frontend
+    env: node
+    region: oregon
+    plan: free
+    rootDir: frontend/frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://ai-support-backend.onrender.com
+
+  - type: web
     name: ai-support-backend
     env: node
     region: oregon
@@ -14,15 +28,3 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
-
-  - type: web
-    name: ai-support-frontend
-    env: node
-    region: oregon
-    plan: free
-    rootDir: frontend/frontend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NEXT_PUBLIC_API_URL
-        value: https://ai-support-backend.onrender.com

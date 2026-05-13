@@ -4,9 +4,8 @@ services:
     env: node
     region: oregon
     plan: free
-    rootDir: frontend/frontend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: cd frontend/frontend && npm install && npm run build
+    startCommand: cd frontend/frontend && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -18,9 +17,8 @@ services:
     env: node
     region: oregon
     plan: free
-    rootDir: frontend/backend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: cd frontend/backend && npm install && npm run build
+    startCommand: cd frontend/backend && npm start
     envVars:
       - key: NODE_ENV
         value: production

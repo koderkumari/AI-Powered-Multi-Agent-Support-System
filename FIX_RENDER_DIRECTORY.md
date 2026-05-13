@@ -1,62 +1,85 @@
-# Fix Render Directory Error
+# Fix for Render Directory Error
 
 ## Problem
-Render is looking for the frontend at the wrong path: `src/frontend/frontend` instead of `frontend/frontend`
+```
+Root directory 'src/frontend/frontend' does not exist, please check settings
+```
+
+This error occurs because Render's dashboard settings have an incorrect root directory configuration that conflicts with the `render.yaml`.
 
 ## Solution
 
-### For Frontend Service (ai-support-frontend):
+### Step 1: Update Render Dashboard for Frontend Service
 
-1. Go to Render Dashboard
-2. Click on the **ai-support-frontend** service
-3. Click **Settings** (top right)
-4. Scroll down to **Root Directory**
-5. Change from: `src/frontend/frontend` → To: `frontend/frontend`
-6. Click **Save**
-
-### For Backend Service (ai-support-backend):
-
-1. Go to Render Dashboard
-2. Click on the **ai-support-backend** service
-3. Click **Settings** (top right)
-4. Scroll down to **Root Directory**
-5. Verify it shows: `frontend/backend`
-6. If different, change to: `frontend/backend`
+1. Go to Render Dashboard → `ai-support-frontend` service
+2. Click **Settings** (top right)
+3. Scroll down to **Build & Deploy** section
+4. Look for **Root Directory** field
+5. **Change from:** `src/frontend/frontend` 
+6. **Change to:** `.` (just a dot - means repository root)
 7. Click **Save**
 
-### After Updating Settings:
+The build and start commands in `render.yaml` will handle the `cd` to the correct directory.
 
-1. Go to the frontend service
+### Step 2: Update Render Dashboard for Backend Service
+
+1. Go to Render Dashboard → `ai-support-backend` service
+2. Click **Settings**
+3. Look for **Root Directory** field
+4. **Change from:** whatever it's set to
+5. **Change to:** `.` (just a dot - means repository root)
+6. Click **Save**
+
+### Step 3: Trigger a Redeploy
+
+Once both services have Root Directory set to `.`:
+
+1. Go to each service
 2. Click **Manual Deploy** → **Deploy latest commit**
-3. Monitor the logs for:
-   - ✓ "npm install" completes
-   - ✓ "npm run build" completes  
-   - ✓ "Server running on http://0.0.0.0:PORT"
+3. Wait for builds to complete
 
-## Correct Directory Structure (from repo root):
+Both services should now:
+- Clone from repository root
+- Use `render.yaml` commands to cd into correct directories
+- Build and start successfully
 
-```
-.
-├── frontend/
-│   ├── backend/          ← Backend service rootDir
-│   └── frontend/         ← Frontend service rootDir
-├── render.yaml
-└── package.json
-```
+## Alternative: Manual Service Configuration
 
-## Environment Variables to Verify
+If the above doesn't work, manually configure each service:
 
-**Frontend (ai-support-frontend):**
-- `NODE_ENV` = `production`
-- `NEXT_PUBLIC_API_URL` = `https://ai-support-backend.onrender.com`
+### Frontend Service
+- **Name:** `ai-support-frontend`
+- **Runtime:** Node
+- **Root Directory:** `.`
+- **Build Command:** `cd frontend/frontend && npm install && npm run build`
+- **Start Command:** `cd frontend/frontend && npm start`
+- **Environment Variables:**
+  - `NODE_ENV=production`
+  - `NEXT_PUBLIC_API_URL=https://ai-support-backend.onrender.com`
 
-**Backend (ai-support-backend):**
-- `NODE_ENV` = `production`
-- `DATABASE_URL` = Your Supabase URL (must be set)
-- `GROQ_API_KEY` = Your Groq API key (must be set)
+### Backend Service
+- **Name:** `ai-support-backend`
+- **Runtime:** Node
+- **Root Directory:** `.`
+- **Build Command:** `cd frontend/backend && npm install && npm run build`
+- **Start Command:** `cd frontend/backend && npm start`
+- **Environment Variables:**
+  - `NODE_ENV=production`
+  - `DATABASE_URL=<your_db_url>`
+  - `GROQ_API_KEY=<your_api_key>`
 
-## If Still Having Issues
+## Why This Works
 
-1. Try deleting both services and recreating them
-2. Or disconnect and reconnect the GitHub repo
-3. Make sure `render.yaml` is in the repository root
+- By setting Root Directory to `.` (repository root), Render checks out the entire repo
+- The `render.yaml` defines commands that navigate to the correct subdirectories
+- Each service builds and runs from its own directory
+- This approach works for monorepo structures like ours
+
+## Verification
+
+After redeployment:
+
+1. Check frontend service logs - should show: `Server running on http://0.0.0.0:PORT`
+2. Check backend service logs - should show: `Server is running on port PORT`
+3. Visit: https://ai-powered-multi-agent-support-system.onrender.com
+4. Should load without 502 error
